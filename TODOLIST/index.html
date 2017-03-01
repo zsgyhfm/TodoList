@@ -51,7 +51,7 @@
             margin-top: 5px;
             height: 32px;
             line-height: 32px;
-            /*position: relative;*/
+            position: relative;
 
         }
         #list1 li {
@@ -59,15 +59,16 @@
             margin-top: 5px;
             height: 32px;
             line-height: 32px;
-            background-color: #beb7b3;
+            background-color: rgba(0,0,0,0.2);
             color:gray;
+            position: relative;
         }
         .btn-del{
             height: 20px;
             line-height: 20px;
             position: absolute;
-            right: 25px;
-            top: 11px;
+            right: 10px;
+            top: 5px;
 
         }
         .btn-del >span{
@@ -117,7 +118,7 @@
         </section>
     </div>
     <!--音频播放器-->
-    <video style="display: none" src="http://so1.111ttt.com:8282/2016/1/12m/04/205041718593.m4a?tflag=1488350884&pin=f743f8e51955599106fcec56d3f4c99b&ip=119.130.34.33#.mp3" controls="controls"autoplay="autoplay"></video>
+    <!--<video style="display: none" src="http://so1.111ttt.com:8282/2016/1/12m/04/205041718593.m4a?tflag=1488350884&pin=f743f8e51955599106fcec56d3f4c99b&ip=119.130.34.33#.mp3" controls="controls"autoplay="autoplay"></video>-->
 </div>
 <script>
 
@@ -130,12 +131,14 @@
         var list = document.getElementById('form');
         var content = list.value;
         var str = new String(content);//防止内存泄露
+        list.value = null
         if(str.length>0){
             var li =  creatDom(content);
             var list = document.getElementById('list');
             list.appendChild(li);//添加到list
             //更新事件数量
             updateTask();
+
         }
     }
 
