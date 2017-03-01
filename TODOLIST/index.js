@@ -138,15 +138,6 @@ function updateTask() {
 
 }
 
-//监听关闭
-window.onbeforeunload = onbeforeunload_handler;
-
-function onbeforeunload_handler() {
-    //更新下数据库
-    updataTaksId();
-    var warning = "确认退出?";
-    return warning;
-}
 
 
 //没用上
@@ -259,4 +250,16 @@ function updataTaksId(){
     dataBase.transaction(function (db) {
         db.executeSql('UPDATE mytask set taskId=rowid WHERE taskId!=rowid');
     })
+}
+
+
+
+//监听关闭
+window.onbeforeunload = onbeforeunload_handler;
+
+function onbeforeunload_handler() {
+    //更新下数据库
+    updataTaksId();
+    var warning = "确认退出?";
+    return warning;
 }
