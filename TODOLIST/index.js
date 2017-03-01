@@ -231,7 +231,7 @@ function selectData() {
             if (taskdata) {
                 for (var i = 0; i < taskdata.length; i++) {
                     var task = taskdata[i];
-                    var dom = creatDom(task.taskId, task.taskContent, task.taskIscomplete);
+                    var dom = creatDom(task.taskId, task.taskcontent, task.taskiscomplete);
                     var list = document.getElementById('list');
                     var list1 = document.getElementById('list1');
                     if (task.taskIscomplete == "true") {
