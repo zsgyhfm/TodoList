@@ -24,11 +24,6 @@
             margin-top: 10px;
         }
 
-        .bor {
-            /*border: 1px solid red;*/
-
-        }
-
         .content {
             margin-left: 10px;
             font-size: 15px;
@@ -54,16 +49,18 @@
             position: relative;
 
         }
+
         #list1 li {
             border-left: 2px #999999 solid;
             margin-top: 5px;
             height: 32px;
             line-height: 32px;
-            background-color: rgba(0,0,0,0.2);
-            color:gray;
+            background-color: rgba(0, 0, 0, 0.2);
+            color: gray;
             position: relative;
         }
-        .btn-del{
+
+        .btn-del {
             height: 20px;
             line-height: 20px;
             position: absolute;
@@ -71,7 +68,8 @@
             top: 5px;
 
         }
-        .btn-del >span{
+
+        .btn-del > span {
             font-size: 23px;
             color: #f58c52;
         }
@@ -120,10 +118,30 @@
     <!--音频播放器-->
     <!--<video style="display: none" src="http://so1.111ttt.com:8282/2016/1/12m/04/205041718593.m4a?tflag=1488350884&pin=f743f8e51955599106fcec56d3f4c99b&ip=119.130.34.33#.mp3" controls="controls"autoplay="autoplay"></video>-->
 </div>
+<script src="data.js"></script>
 <script>
 
     var completeNum = 0;//完成的事件数量
     var runningNum = 0;//正在执行的事件数量
+    //初次加载使用本地数据
+    (function localdata() {
+        for (var i = 0; i < data.task.length; i++) {
+            var task = data.task[i];
+            var dom = creatDom(task.taskId, task.taskContent, task.taskIscomplete);
+            var list = document.getElementById('list');
+            var list1 = document.getElementById('list1');
+            if (task.taskIscomplete) {
+                list1.appendChild(dom);//添加到list
+            } else {
+                list.appendChild(dom);//添加到list1
+            }
+
+            //更新事件数量
+            updateTask();
+
+        }
+    })();
+
     /**
      * 添加事件列表 -form表单触发 enter
      */
@@ -131,39 +149,58 @@
         var list = document.getElementById('form');
         var content = list.value;
         var str = new String(content);//防止内存泄露
-        list.value = null
-        if(str.length>0){
-            var li =  creatDom(content);
+        list.value = null;
+        if (str.length > 0) {
+            var li = creatDom(null,content,null);
             var list = document.getElementById('list');
             list.appendChild(li);//添加到list
             //更新事件数量
             updateTask();
 
-        }
-    }
 
+        }
+
+    }
     /**
      * 创建元素
      * @param content 事件内容
      * @param iscomplete 是否完成
+     * @param data 数据源
      */
-    function creatDom(content,iscomplete) {
+    function creatDom(id, content, iscomplete) {
         //随机id
-        var id = randomID();
+        var id;
+        if (!id) {
+            //更新data.js
+            var newtask = {
+                taskId: id,//唯一索引
+                taskContent: content,//内容
+                taskIscomplete: iscomplete,//是否完成
+            }
+            data.task.push(newtask);
+            //生成随机id
+            id = randomID();
+        }
         //模板
-        var template = '<input type="checkbox" class="check" data-id="' +
-                id + 'checked'+iscomplete+
-                '">' +
+        var check = ''
+        if (iscomplete){
+            check = "checked"
+        }
+        var template = '<input type="checkbox" class="check" data-id="' +id+ '"'+
+                check+'>' +
                 '<label class="content">' +
                 content +
-                '</label>'+'<button type="button" class="close btn-del" aria-label="Close">'+
-                '<span aria-hidden="true" class="text-danger">x</span>'+
-                '</button>;'
+                '</label>' + '<button type="button" class="close btn-del" aria-label="Close">' +
+                '<span aria-hidden="true" class="text-danger">x</span>' +
+                '</button>;';
+
         var li = document.createElement('li');
         li.innerHTML = template;
-        li.dataset.del=false;//没有被删除
-        return li
 
+
+
+
+        return li
 
     }
     //生成随机id--不严密 暂时这样
@@ -176,10 +213,10 @@
     list.addEventListener('click', function (e) {
         if (e.target.nodeName == "INPUT") {
             var li = e.target.parentNode;//获取父级元素 li
-            if(e.target.checked){//判断是否勾选
+            if (e.target.checked) {//判断是否勾选
                 //选中就从list中移除
                 list.removeChild(li);
-                li.setAttribute('checked','checked');
+                li.setAttribute('checked', 'checked');
                 document.getElementById('list1').appendChild(li);
                 updateTask(true);
             }
@@ -190,10 +227,10 @@
     list1.addEventListener('click', function (e) {
         if (e.target.nodeName == "INPUT") {
             var li = e.target.parentNode;//获取父级元素 li
-            if(!e.target.checked){//判断是否勾选
+            if (!e.target.checked) {//判断是否勾选
                 //选中就从list中移除
                 list1.removeChild(li);
-                li.setAttribute('checked',false);
+                li.setAttribute('checked', false);
                 list.appendChild(li);
                 updateTask();
             }
@@ -201,7 +238,7 @@
     });
     //删除
     document.body.addEventListener('click', function (e) {
-        if(e.target.nodeName=='SPAN'){
+        if (e.target.nodeName == 'SPAN') {
             //获取ul列表
             var suplist = e.target.parentNode.parentNode.parentNode;
             //要被删除的列表
@@ -214,7 +251,7 @@
 
 
     //更新事件数量
-    function  updateTask(){
+    function updateTask() {
         //更新 正在进行的事件数量
         var run = document.getElementById('running');
         var compeleted = document.getElementById('completed');
@@ -226,6 +263,21 @@
         compeleted.innerText = lists1.children.length;
 
     }
+
+    //监听关闭
+    window.onbeforeunload = onbeforeunload_handler;
+//    window.onunload = onunload_handler;
+    function onbeforeunload_handler() {
+        console.log(data);
+        var warning = "确认退出?";
+
+        return warning;
+    }
+
+//    function onunload_handler() {
+//        var warning = "谢谢光临";
+//        alert(warning);
+//    }
 </script>
 </body>
 </html>
