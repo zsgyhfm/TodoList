@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>todoList</title>
+    <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #CDCDCD;
+        }
+
+        .bg-nav {
+            background-color: rgba(47, 47, 47, 0.98);
+            height: 50px;
+            line-height: 50px;
+        }
+
+        .text-white {
+            color: #dddddd;
+            font-size: 24px;
+        }
+
+        form {
+            margin-top: 10px;
+        }
+
+        .bor {
+            /*border: 1px solid red;*/
+
+        }
+
+        .content {
+            margin-left: 10px;
+            font-size: 15px;
+            font-weight: 300;
+        }
+
+        input[type="checkbox"] {
+            margin-left: 10px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #list li {
+            background-color: white;
+            border-left: 2px #2aabd2 solid;
+            margin-top: 5px;
+            height: 32px;
+            line-height: 32px;
+
+        }
+        #list1 li {
+            border-left: 2px #2aabd2 solid;
+            margin-top: 5px;
+            height: 32px;
+            line-height: 32px;
+            background-color: darkgray;
+            color:gray;;
+        }
+    </style>
+</head>
+<body>
+<!--nav-->
+<div class="container-fluid ">
+    <div class="row bg-nav">
+        <!--导航-->
+        <section class="col-md-8  col-md-offset-1 bor">
+            <section class="col-md-6 text-center text-white  ">
+                ToDoList
+            </section>
+            <form action="javascript:add()" class="col-md-6 bor">
+                <input type="text" id="form" class="form-control input-sm" placeholder="添加Todo">
+            </form>
+        </section>
+    </div>
+    <!--内容区-->
+    <div class="row">
+        <section class="col-md-8 bor col-md-offset-1 ">
+            <div class="col-md-4 col-md-offset-2 text-left "><h3>正在进行</h3></div>
+            <div class="col-md-6 text-right"><h3 id="running">0</h3></div>
+        </section>
+        <!--列表-->
+        <section class="col-md-8 bor col-md-offset-1 supcontent">
+            <ul class="bor col-md-10 col-md-offset-2" id="list">
+            </ul>
+        </section>
+        <section class="col-md-8 bor col-md-offset-1">
+            <div class="col-md-4 col-md-offset-2 text-left "><h3>已经完成</h3></div>
+            <div class="col-md-6 text-right"><h3 id="completed">0</h3></div>
+        </section>
+        <section class="col-md-8 bor col-md-offset-1 supcontent">
+            <ul class="bor col-md-10 col-md-offset-2" id="list1">
+                <li><input type="checkbox" checked="checked" class="check" data-id="0.8436668189025898"><label class="content">123</label></li>
+            </ul>
+        </section>
+    </div>
+    <!--音频播放器-->
+    <!--<video src="成都.mp3" controls="controls"autoplay="autoplay"></video>-->
+</div>
+<script>
+
+    var completeNum = 0;//完成的事件数量
+    var runningNum = 0;//正在执行的事件数量
+    /**
+     * 添加事件列表 -form表单触发 enter
+     */
+    function add() {
+        var list = document.getElementById('form');
+        var content = list.value;
+        var str = new String(content);//防止内存泄露
+        if(str.length>0){
+           var li =  creatDom(content);
+            var list = document.getElementById('list');
+            list.appendChild(li);//添加到list
+            //更新事件数量
+            updateTask();
+        }
+    }
+
+    /**
+     * 创建元素
+     * @param content 事件内容
+     * @param iscomplete 是否完成
+     */
+    function creatDom(content,iscomplete) {
+        //随机id
+        var id = randomID();
+        //模板
+        var template = '<input type="checkbox" class="check" data-id="' +
+                id + 'checked'+iscomplete+
+                '">' +
+                '<label class="content">' +
+                content +
+                '</label>';
+        var li = document.createElement('li');
+        li.innerHTML = template;
+        return li
+
+
+    }
+    //生成随机id--不严密 暂时这样
+    function randomID() {
+        return Math.random(1);
+    }
+
+    //checkbox绑定事件--事件冒泡
+    var list = document.getElementById('list');
+    list.addEventListener('click', function (e) {
+        if (e.target.nodeName == "INPUT") {
+            var li = e.target.parentNode;//获取父级元素 li
+            if(e.target.checked){//判断是否勾选
+                //选中就从list中移除
+                list.removeChild(li);
+                li.setAttribute('checked','checked');
+                document.getElementById('list1').appendChild(li);
+                updateTask(true);
+            }
+        }
+    });
+    var list1 = document.getElementById('list1');
+    list1.addEventListener('click', function (e) {
+        if (e.target.nodeName == "INPUT") {
+            var li = e.target.parentNode;//获取父级元素 li
+            if(!e.target.checked){//判断是否勾选
+                //选中就从list中移除
+                list1.removeChild(li);
+                li.setAttribute('checked',false);
+                list.appendChild(li);
+                updateTask();
+            }
+        }
+    });
+
+
+    //更新事件数量
+    function  updateTask(){
+        //更新 正在进行的事件数量
+        var run = document.getElementById('running');
+        var compeleted = document.getElementById('completed');
+
+        //列表组
+        var lists = document.getElementById('list');
+        var lists1 = document.getElementById('list1');
+        run.innerText = lists.children.length;
+        compeleted.innerText = lists1.children.length;
+
+    }
+</script>
+</body>
+</html>
