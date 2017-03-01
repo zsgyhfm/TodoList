@@ -51,15 +51,28 @@
             margin-top: 5px;
             height: 32px;
             line-height: 32px;
+            /*position: relative;*/
 
         }
         #list1 li {
-            border-left: 2px #2aabd2 solid;
+            border-left: 2px #999999 solid;
             margin-top: 5px;
             height: 32px;
             line-height: 32px;
-            background-color: darkgray;
-            color:gray;;
+            background-color: #beb7b3;
+            color:gray;
+        }
+        .btn-del{
+            height: 20px;
+            line-height: 20px;
+            position: absolute;
+            right: 25px;
+            top: 11px;
+
+        }
+        .btn-del >span{
+            font-size: 23px;
+            color: #f58c52;
         }
     </style>
 </head>
@@ -83,7 +96,7 @@
             <div class="col-md-4 col-md-offset-2 text-left "><h3>正在进行</h3></div>
             <div class="col-md-6 text-right"><h3 id="running">0</h3></div>
         </section>
-        <!--列表-->
+        <!--事件列表-->
         <section class="col-md-8 bor col-md-offset-1 supcontent">
             <ul class="bor col-md-10 col-md-offset-2" id="list">
             </ul>
@@ -92,9 +105,14 @@
             <div class="col-md-4 col-md-offset-2 text-left "><h3>已经完成</h3></div>
             <div class="col-md-6 text-right"><h3 id="completed">0</h3></div>
         </section>
+        <!--完成列表-->
         <section class="col-md-8 bor col-md-offset-1 supcontent">
             <ul class="bor col-md-10 col-md-offset-2" id="list1">
-                <li><input type="checkbox" checked="checked" class="check" data-id="0.8436668189025898"><label class="content">123</label></li>
+                <!--<li><input type="checkbox" checked="checked" class="check" data-id="0.8436668189025898">-->
+                <!--<label class="content">123</label>-->
+                <!--<button type="button" class="close btn-del" aria-label="Close">-->
+                <!--<span aria-hidden="true" class="text-danger">x</span>-->
+                </button></li>
             </ul>
         </section>
     </div>
@@ -113,7 +131,7 @@
         var content = list.value;
         var str = new String(content);//防止内存泄露
         if(str.length>0){
-           var li =  creatDom(content);
+            var li =  creatDom(content);
             var list = document.getElementById('list');
             list.appendChild(li);//添加到list
             //更新事件数量
@@ -135,9 +153,12 @@
                 '">' +
                 '<label class="content">' +
                 content +
-                '</label>';
+                '</label>'+'<button type="button" class="close btn-del" aria-label="Close">'+
+                '<span aria-hidden="true" class="text-danger">x</span>'+
+                '</button>;'
         var li = document.createElement('li');
         li.innerHTML = template;
+        li.dataset.del=false;//没有被删除
         return li
 
 
@@ -147,7 +168,7 @@
         return Math.random(1);
     }
 
-    //checkbox绑定事件--事件冒泡
+    //给事件任务列表绑定事件--事件冒泡
     var list = document.getElementById('list');
     list.addEventListener('click', function (e) {
         if (e.target.nodeName == "INPUT") {
@@ -162,6 +183,7 @@
         }
     });
     var list1 = document.getElementById('list1');
+    //给事件完成列表添加事件
     list1.addEventListener('click', function (e) {
         if (e.target.nodeName == "INPUT") {
             var li = e.target.parentNode;//获取父级元素 li
@@ -174,6 +196,18 @@
             }
         }
     });
+    //删除
+    document.body.addEventListener('click', function (e) {
+        if(e.target.nodeName=='SPAN'){
+            //获取ul列表
+            var suplist = e.target.parentNode.parentNode.parentNode;
+            //要被删除的列表
+            var sublist = e.target.parentNode.parentNode;
+            suplist.removeChild(sublist);
+            //删除完毕 更新数量
+            updateTask()
+        }
+    })
 
 
     //更新事件数量
