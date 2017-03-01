@@ -1,0 +1,68 @@
+body {
+    background-color: #CDCDCD;
+}
+
+.bg-nav {
+    background-color: rgba(47, 47, 47, 0.98);
+    height: 50px;
+    line-height: 50px;
+}
+
+.text-white {
+    color: #dddddd;
+    font-size: 24px;
+}
+
+form {
+    margin-top: 10px;
+}
+
+.content {
+    margin-left: 10px;
+    font-size: 15px;
+    font-weight: 300;
+}
+
+input[type="checkbox"] {
+    margin-left: 10px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#list li {
+    background-color: white;
+    border-left: 2px #2aabd2 solid;
+    margin-top: 5px;
+    height: 32px;
+    line-height: 32px;
+    position: relative;
+
+}
+
+#list1 li {
+    border-left: 2px #999999 solid;
+    margin-top: 5px;
+    height: 32px;
+    line-height: 32px;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: gray;
+    position: relative;
+}
+
+.btn-del {
+    height: 20px;
+    line-height: 20px;
+    position: absolute;
+    right: 10px;
+    top: 5px;
+
+}
+
+.btn-del > span {
+    font-size: 23px;
+    color: #f58c52;
+}
