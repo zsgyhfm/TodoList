@@ -117,32 +117,20 @@
     </div>
 
 </div>
-<script src="data.js"></script>
 <script>
 
     var completeNum = 0;//完成的事件数量
     var runningNum = 0;//正在执行的事件数量
-    //初次加载使用本地数据
-    (function localdata() {
-        for (var i = 0; i < data.task.length; i++) {
-            var task = data.task[i];
-            var dom = creatDom(task.taskId, task.taskContent, task.taskIscomplete);
-            var list = document.getElementById('list');
-            var list1 = document.getElementById('list1');
-            if (task.taskIscomplete) {
-                list1.appendChild(dom);//添加到list
-            } else {
-                list.appendChild(dom);//添加到list1
-            }
+    //随机id
+    var id;
+    //打开数据库
+    var dataBase = window.openDatabase('task','1.0','事件记录',1024*10);
 
-            //更新事件数量
-            updateTask();
-
-        }
-    })();
+    //加载数据库数据
+    window.onload = selectData();
 
     /**
-     * 添加事件列表 -form表单触发 enter
+     * enter 添加条目
      */
     function add() {
         var list = document.getElementById('form');
@@ -153,10 +141,10 @@
             var li = creatDom(null,content,null);
             var list = document.getElementById('list');
             list.appendChild(li);//添加到list
+            //添加数据到数据库-并更新taksId
+            insertData(id,content,"false")
             //更新事件数量
             updateTask();
-
-
         }
 
     }
@@ -167,8 +155,7 @@
      * @param data 数据源
      */
     function creatDom(id, content, iscomplete) {
-        //随机id
-        var id;
+
         if (!id) {
             //更新data.js
             var newtask = {
@@ -176,13 +163,13 @@
                 taskContent: content,//内容
                 taskIscomplete: iscomplete,//是否完成
             }
-            data.task.push(newtask);
+
             //生成随机id
             id = randomID();
         }
         //模板
         var check = ''
-        if (iscomplete){
+        if (iscomplete=="true"){
             check = "checked"
         }
         var template = '<input type="checkbox" class="check" data-id="' +id+ '"'+
@@ -195,14 +182,11 @@
 
         var li = document.createElement('li');
         li.innerHTML = template;
-
-
-
-
         return li
 
     }
-    //生成随机id--不严密 暂时这样
+
+    //生成随机id--不严密 暂时这样--已同步rowid
     function randomID() {
         return Math.random(1);
     }
@@ -217,6 +201,8 @@
                 list.removeChild(li);
                 li.setAttribute('checked', 'checked');
                 document.getElementById('list1').appendChild(li);
+                //更新数据库数据状态
+                updataDataBase('true')
                 updateTask(true);
             }
         }
@@ -231,6 +217,7 @@
                 list1.removeChild(li);
                 li.setAttribute('checked', false);
                 list.appendChild(li);
+                updataDataBase('false')
                 updateTask();
             }
         }
@@ -243,7 +230,11 @@
             //要被删除的列表
             var sublist = e.target.parentNode.parentNode;
             suplist.removeChild(sublist);
-            //删除完毕 更新数量
+            //回车键 后多来
+            var con = sublist.innerText;
+            con = sublist.innerText.substr(0,con.length-2);
+            deleteDatabase(con)
+            //删除完毕 更新页面数量
             updateTask()
         }
     })
@@ -267,13 +258,124 @@
     window.onbeforeunload = onbeforeunload_handler;
 
     function onbeforeunload_handler() {
-        console.log(data);
+        //更新下数据库
+        updataTaksId();
         var warning = "确认退出?";
-
         return warning;
     }
 
 
+//没用上
+    function creatDatabase(){
+        /**
+         * 1.打开已存在的数据库 如果不存在就新创建
+         * 参数1 数据库名称
+         * 参数2 数据库版本号
+         * 参数3 数据库的描述
+         * 参数4 分配的存储空间(单位kb)
+         * 参数5 回调函数名(可以省略)
+         */
+        var dataBase = window.openDatabase('task','1.0','事件记录',1024*10);
+        if(!dataBase){
+            alert('你的浏览器不支持本地数据库')
+        }
+        //2.创建数据库表  -关键字要大些
+        var sql = 'creat table mytable(id text,content text)';
+        dataBase.transaction(function (db) {
+            db.executeSql(sql)
+        })
+    }
+
+    //执行创建表的操作
+    function addinfo(){
+        dataBase.transaction(function (db) {
+            var sql = 'CREATE TABLE  mytask (taskId number,taskContent text,taskIscomplete text)'
+            db.executeSql(sql)
+        })
+    }
+    /**
+     * 删除指定行
+     * str:是内容  获取id有难度  牺牲点效率
+     */
+    function deleteDatabase(str){
+        dataBase.transaction(function (db) {
+            var sql = ''
+            db.executeSql('DELETE FROM mytask WHERE taskcontent=?',[str], function (db,success) {
+        console.log(success)
+            }, function (db,error) {
+                console.log('删除失败'+error);
+            })
+        })
+    }
+
+    /**
+     * 插入数据到数据库
+     * @param taskid
+     * @param taskcontent
+     * @param taskiscomplete
+     */
+    function insertData(taskid,taskcontent,taskiscomplete){
+        dataBase.transaction(function (db) {
+           db.executeSql('insert into mytask values(?,?,?)',[taskid,taskcontent,taskiscomplete], function (db,me) {
+                //更新taskId
+               updataTaksId();
+           }, function (db,error) {
+               console.log(error)
+           });
+        })
+    }
+    /**
+     * 更新数据
+     * str: 字符串 true/false
+     */
+    function updataDataBase(str){
+        dataBase.transaction(function (db) {
+            db.executeSql('update mytask set taskiscomplete=?',[str], function (db,message) {
+                console.log('更新成功');
+            }, function (db,error) {
+                console.log('更新状态失败'+error);//失败提示
+            })
+        })
+    }
+
+    //查询数据库并更新到页面
+    function selectData(){
+     if(!dataBase){
+         alert('浏览器不支持');
+         return;
+     }
+        dataBase.transaction(function (db) {
+          db.executeSql('SELECT * FROM mytask ',[], function (db,result) {
+              var taskdata = result.rows;
+              if(taskdata){
+                  for (var i = 0; i < taskdata.length; i++) {
+                      var task = taskdata[i];
+                      var dom = creatDom(task.taskId, task.taskContent, task.taskIscomplete);
+                      var list = document.getElementById('list');
+                      var list1 = document.getElementById('list1');
+                      if (task.taskIscomplete=="true") {
+                          list1.appendChild(dom);//添加到list
+                      } else {
+                          list.appendChild(dom);//添加到list1
+                      }
+                      //更新事件数量
+                      updateTask();
+
+                  }
+              }
+          }, function (db,error) {
+              console.log('错误信息'+error);
+          })
+        })
+    }
+
+
+    //更新下taskId
+    function updataTaksId(){
+        dataBase.transaction(function (db) {
+            db.executeSql('UPDATE mytask set taskId=rowid WHERE taskId!=rowid');
+        })
+    }
 </script>
 </body>
 </html>
