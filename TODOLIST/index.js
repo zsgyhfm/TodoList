@@ -63,23 +63,28 @@ function randomID() {
     return Math.random(1);
 }
 
-//给事件任务列表绑定事件--事件冒泡
+
+
+
 var list = document.getElementById('list');
+var list1 = document.getElementById('list1');
+//给事件任务列表绑定事件--事件冒泡
 list.addEventListener('click', function (e) {
     if (e.target.nodeName == "INPUT") {
         var li = e.target.parentNode;//获取父级元素 li
         if (e.target.checked) {//判断是否勾选
             //选中就从list中移除
             list.removeChild(li);
-            li.setAttribute('checked', 'checked');
-            document.getElementById('list1').appendChild(li);
+            list1.appendChild(li);
+           var content =  li.innerText;
+            content = content.substr(0,content.length-2);
             //更新数据库数据状态
-            updataDataBase('true')
+            updataDataBase('true',content);
             updateTask(true);
         }
     }
 });
-var list1 = document.getElementById('list1');
+
 //给事件完成列表添加事件
 list1.addEventListener('click', function (e) {
     if (e.target.nodeName == "INPUT") {
@@ -87,9 +92,10 @@ list1.addEventListener('click', function (e) {
         if (!e.target.checked) {//判断是否勾选
             //选中就从list中移除
             list1.removeChild(li);
-            li.setAttribute('checked', false);
             list.appendChild(li);
-            updataDataBase('false')
+            var content =  li.innerText;
+            content = content.substr(0,content.length-2);
+            updataDataBase('false',content)
             updateTask();
         }
     }
@@ -190,9 +196,9 @@ function insertData( taskcontent, taskiscomplete) {
  * 更新数据
  * str: 字符串 true/false
  */
-function updataDataBase(str) {
+function updataDataBase(istrue,content) {
     dataBase.transaction(function (db) {
-        db.executeSql('update mytask set taskiscomplete=?', [str], function (db, message) {
+        db.executeSql('update mytask set taskiscomplete=?where taskcontent=?', [istrue,content], function (db, message) {
             console.log('更新成功');
         }, function (db, error) {
             console.log('更新状态失败' + error);//失败提示
